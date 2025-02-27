@@ -1,0 +1,13 @@
+fastapi==0.109.2
+uvicorn[standard]==0.27.1
+asyncpg==0.29.0
+python-dotenv==1.0.1
+textblob==0.17.1
+nltk==3.8.1
+pandas==2.2.1
+scikit-learn==1.4.1.post1
+plotly==5.18.0
+sqlalchemy==2.0.28
+alembic==1.13.1
+python-multipart==0.0.9
+pydantic-settings==2.2.1
