@@ -1,4 +1,3 @@
-# app/routers/engagement.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func, select
@@ -8,7 +7,6 @@ from app.core.database import get_db
 from datetime import datetime, timedelta
 import json
 
-router = APIRouter(prefix="/engagement", tags=["User Engagement"])
 
 @router.post("/log-activity/", status_code=201)
 async def log_user_activity(
