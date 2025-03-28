@@ -9,6 +9,9 @@ from io import BytesIO
 from typing import List
 
 class AnalyticsProcessor:
+    FLAGGED_WORDS = [
+        'hate', 'violence', 'profanity', 'racist', 'attack'  # Add more words
+    ]
     @staticmethod
     def analyze_sentiment(text: str) -> dict:
         analysis = TextBlob(text)
@@ -68,4 +71,35 @@ class AnalyticsProcessor:
             "hourly_engagement": activities.resample('H', on='timestamp').size().to_dict(),
             "daily_trends": activities.groupby([pd.Grouper(key='timestamp', freq='D'), 'activity_type']).size().unstack(fill_value=0).to_dict(),
             "weekly_correlation": activities.groupby([activities['timestamp'].dt.day_name(), 'activity_type']).size().unstack(fill_value=0).to_dict()
+        }
+    
+   
+
+    @staticmethod
+    def analyze_moderation_score(text: str) -> dict:
+        # Preprocess text and find flagged words
+        text_clean = re.sub(r'[^\w\s]', '', text.lower())
+        found_words = [word for word in text_clean.split() if word in AnalyticsProcessor.FLAGGED_WORDS]
+        
+        # Calculate sentiment
+        sentiment = AnalyticsProcessor.analyze_sentiment(text)
+        
+        # Calculate toxicity score (0-100)
+        keyword_score = min(len(found_words) * 25, 60)  # Max 60 from keywords
+        sentiment_score = max(0, -sentiment['polarity']) * 40  # Max 40 from sentiment
+        toxicity_score = min(round(keyword_score + sentiment_score), 100)
+        
+        # Determine status
+        if toxicity_score <= 30:
+            status = "safe"
+        elif toxicity_score <= 70:
+            status = "needs review"
+        else:
+            status = "high-risk"
+        
+        return {
+            "toxicity_score": toxicity_score,
+            "flagged_words": list(set(found_words)),  # Deduplicate
+            "status": status,
+            "warning": "This message may violate community guidelines." if status != "safe" else None
         }
